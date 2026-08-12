@@ -15,3 +15,15 @@ services:
       MONGO_URI: mongodb://host.docker.internal:27017/secondhand
     extra_hosts:
       - "host.docker.internal:host-gateway"
+  
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Frontend/Dockerfile
+    container_name: secondhand-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
