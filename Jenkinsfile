@@ -3,13 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                echo 'Checking out source code...'
-                checkout scm
-            }
-        }
-
         stage('Build') {
             steps {
                 echo 'Building Docker images...'
@@ -36,10 +29,10 @@ pipeline {
                     docker compose ps
 
                     echo "Testing backend..."
-                    curl -f http://127.0.0.1:5000/ || true
+                    curl -f http://127.0.0.1:5000/ || exit 1
 
                     echo "Testing frontend..."
-                    curl -f http://127.0.0.1/ || true
+                    curl -f http://127.0.0.1/ || exit 1
                 '''
             }
         }
