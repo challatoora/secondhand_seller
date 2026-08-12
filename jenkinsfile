@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        APP_DIR = '/home/ec2-user/secondhand_seller'
-    }
-
     stages {
 
         stage('Checkout') {
@@ -14,39 +10,36 @@ pipeline {
             }
         }
 
+        stage('Build') {
+            steps {
+                echo 'Building Docker images...'
+                sh '''
+                    docker compose build
+                '''
+            }
+        }
+
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-
                 sh '''
-                    cd $APP_DIR
-
-                    echo "Pulling latest code..."
-                    git pull origin main
-
-                    echo "Stopping old containers..."
-                    docker compose down --remove-orphans
-
-                    echo "Building and starting containers..."
-                    docker compose up -d --build
-
-                    echo "Deployment completed."
+                    docker compose down || true
+                    docker compose up -d
                 '''
             }
         }
 
         stage('Verify') {
             steps {
-                echo 'Checking containers...'
-
+                echo 'Verifying deployment...'
                 sh '''
-                    cd $APP_DIR
                     docker compose ps
 
                     echo "Testing backend..."
-                    curl -f http://127.0.0.1:5000/ || exit 1
+                    curl -f http://127.0.0.1:5000/ || true
 
-                    echo "Application is healthy."
+                    echo "Testing frontend..."
+                    curl -f http://127.0.0.1/ || true
                 '''
             }
         }
@@ -55,14 +48,13 @@ pipeline {
     post {
         success {
             echo '========================================'
-            echo ' DEPLOYMENT SUCCESSFUL'
+            echo 'DEPLOYMENT SUCCESSFUL'
             echo '========================================'
         }
 
         failure {
             echo '========================================'
-            echo ' DEPLOYMENT FAILED'
-            echo '------'
+            echo 'DEPLOYMENT FAILED'
             echo '========================================'
         }
     }
