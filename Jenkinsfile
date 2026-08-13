@@ -19,6 +19,7 @@ pipeline {
                sh 'docker compose down'
                sh 'docker compose up -d'
                sh 'sleep 30'
+               echo 'hi'
            }
        }
    }
