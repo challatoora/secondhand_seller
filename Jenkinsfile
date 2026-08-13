@@ -18,6 +18,7 @@ pipeline {
                sh 'cp $ENV_FILE .env'
                sh 'docker compose down'
                sh 'docker compose up -d'
+               sh 'sleep 30'
            }
        }
    }
