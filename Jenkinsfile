@@ -12,17 +12,32 @@ pipeline {
             }
         }
 
+//         stage('Deploy') {
+//        steps {
+//            withCredentials([file(credentialsId: 'secondhandle-env', variable: 'ENV_FILE')]) {
+//                sh 'cp $ENV_FILE .env'
+//                sh 'docker compose down'
+//                sh 'docker compose up -d'
+//                sh 'sleep 30'
+//                echo 'hi'
+//            }
+//        }
+//    }
+        
         stage('Deploy') {
-       steps {
-           withCredentials([file(credentialsId: 'secondhandle-env', variable: 'ENV_FILE')]) {
-               sh 'cp $ENV_FILE .env'
-               sh 'docker compose down'
-               sh 'docker compose up -d'
-               sh 'sleep 30'
-               echo 'hi'
-           }
-       }
-   }
+            steps {
+                withCredentials([file(credentialsId: 'secondhandle-env', variable: 'ENV_FILE')]) {
+                    sh '''
+                        rm -f .env
+                        cp $ENV_FILE .env
+                        chmod 644 .env
+                        docker compose down
+                        docker compose up -d
+                        sleep 30
+                    '''
+                }
+            }
+        }
 
         stage('Verify') {
             steps {
