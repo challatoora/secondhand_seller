@@ -1,33 +1,43 @@
+# =========================
+# Stage 1: Build React app
+# =========================
 FROM node:16-alpine AS build
 
 WORKDIR /app
 
-COPY Frontend/package*.json ./
+# Copy frontend package files
+COPY Frontend/package.json ./
+COPY Frontend/package-lock.json ./
 
-RUN npm ci
+# Install dependencies
+RUN npm install --legacy-peer-deps
 
+# Copy frontend source
 COPY Frontend/ ./
 
+# Build React application
 RUN npm run build
 
-# Stage 2: Nginx
 
+# =========================
+# Stage 2: Nginx
+# =========================
 FROM nginx:alpine AS production
 
-# Remove default 
+# Remove default Nginx files
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy React production
+# Copy React production build
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Nginx config
+# Copy Nginx configuration
 COPY Frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Create non-root user
 RUN addgroup -S appgroup && \
     adduser -S appuser -G appgroup
 
-# Give user ownership of required nginx directories
+# Give required directories to non-root user
 RUN chown -R appuser:appgroup \
     /usr/share/nginx/html \
     /var/cache/nginx \
@@ -35,7 +45,7 @@ RUN chown -R appuser:appgroup \
     /etc/nginx/conf.d \
     /run
 
-# Nginx needs writable PID location
+# Use writable PID location
 RUN sed -i 's|pid        /var/run/nginx.pid;|pid        /tmp/nginx.pid;|' /etc/nginx/nginx.conf
 
 USER appuser
