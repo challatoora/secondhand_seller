@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'Agent_Project' }
 
     stages {
 
@@ -13,14 +13,14 @@ pipeline {
         }
 
         stage('Deploy') {
-            steps {
-                echo 'Deploying application...'
-                sh '''
-                    docker compose down || true
-                    docker compose up -d
-                '''
-            }
-        }
+       steps {
+           withCredentials([file(credentialsId: 'secondhandle-env', variable: 'ENV_FILE')]) {
+               sh 'cp $ENV_FILE .env'
+               sh 'docker compose down'
+               sh 'docker compose up -d'
+           }
+       }
+   }
 
         stage('Verify') {
             steps {
