@@ -49,6 +49,7 @@ pipeline {
                     curl -f http://127.0.0.1:5000/ || exit 1
 
                     echo "Testing frontend..."
+    
                     curl -f http://127.0.0.1/ || exit 1
                 '''
             }
@@ -65,6 +66,7 @@ pipeline {
         failure {
             echo '========================================'
             echo 'DEPLOYMENT FAILED'
+            echo 'failed'
             echo '========================================'
         }
     }
